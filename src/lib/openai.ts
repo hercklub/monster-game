@@ -39,7 +39,7 @@ export async function getRealtimeToken(
       voice,
       instructions,
       tools,
-      input_audio_transcription: { model: 'gpt-4o-mini-transcribe', language: 'cs' },
+      input_audio_transcription: { model: 'gpt-4o-mini-transcribe', language: 'en' },
       turn_detection: { type: 'server_vad' },
     }),
   })

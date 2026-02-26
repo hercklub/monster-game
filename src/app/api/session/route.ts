@@ -1,47 +1,36 @@
 import { NextResponse } from 'next/server'
 import { getRealtimeToken } from '@/lib/openai'
-import { buildPersonaPrompt } from '@/lib/prompt'
-import { getScenario, listScenarios } from '@/lib/personas'
-import { CreateSessionResponse } from '@/types'
+import { buildGamePrompt } from '@/lib/prompt'
+import { getRole } from '@/lib/roles'
+import { pickRandomCharacter } from '@/lib/characters'
+import { SessionResponse } from '@/types'
 
-/**
- * POST /api/session — Create a new realtime session
- * Returns ephemeral token + persona info for the client
- */
 export async function POST(request: Request) {
   try {
-    const { scenarioId } = await request.json()
-    const scenario = getScenario(scenarioId || 'pepik_healthy')
+    const { playerRole } = await request.json()
+    const role = getRole(playerRole)
 
-    if (!scenario) {
-      return NextResponse.json(
-        { error: 'Scenario not found' },
-        { status: 404 }
-      )
+    if (!role) {
+      return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
     }
 
-    const { systemPrompt, tools } = buildPersonaPrompt(
-      scenario.persona,
-      scenario.goal
-    )
+    const character = pickRandomCharacter()
+    const { systemPrompt, tools } = buildGamePrompt(role, character)
 
     const { clientSecret } = await getRealtimeToken(
       systemPrompt,
-      tools as unknown as Array<Record<string, unknown>>,
-      scenario.persona.voice
+      tools as Array<Record<string, unknown>>,
+      character.voice
     )
 
     const sessionId = crypto.randomUUID()
 
-    const response: CreateSessionResponse = {
+    const response: SessionResponse = {
       sessionId,
       clientSecret,
-      persona: {
-        id: scenario.persona.id,
-        name: scenario.persona.name,
-        voice: scenario.persona.voice,
-        initialAttitude: scenario.persona.initialAttitude,
-      },
+      playerRole: role.id,
+      aiCharacterName: character.name,
+      aiCharacterVoice: character.voice,
     }
 
     return NextResponse.json(response)
@@ -52,16 +41,4 @@ export async function POST(request: Request) {
       { status: 500 }
     )
   }
-}
-
-/**
- * GET /api/session — List available scenarios
- */
-export async function GET() {
-  const scenarios = listScenarios().map((s) => ({
-    id: s.id,
-    persona: { id: s.persona.id, name: s.persona.name },
-    goal: { title: s.goal.title, description: s.goal.description },
-  }))
-  return NextResponse.json({ scenarios })
 }

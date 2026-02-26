@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Convince Demo",
-  description: "Přesvědč AI postavu — Realtime Agent + Supervisor + Scoring",
+  title: "Monster Game — Don't Open The Door",
+  description: "Someone knocks at night. 60 seconds to decide: open or lock.",
 };
 
 export default function RootLayout({
@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="cs">
+    <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

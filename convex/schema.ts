@@ -3,10 +3,16 @@ import { v } from 'convex/values'
 
 export default defineSchema({
   sessions: defineTable({
-    userName: v.string(),
-    personaId: v.string(),
-    personaName: v.string(),
-    outcome: v.string(), // 'converted' | 'rejected' | 'walked_away'
+    playerName: v.string(),
+    playerRole: v.string(),
+    aiCharacter: v.string(),
+    aiType: v.string(),
+    decision: v.string(),
+    outcome: v.string(),
+    points: v.number(),
+    streak: v.number(),
+    decisionTimeMs: v.number(),
+    durationMs: v.number(),
     transcript: v.array(
       v.object({
         role: v.string(),
@@ -14,35 +20,8 @@ export default defineSchema({
         timestamp: v.number(),
       })
     ),
-    moodHistory: v.array(v.number()),
-    finalAttitude: v.number(),
-    score: v.optional(
-      v.object({
-        overall: v.number(),
-        categories: v.object({
-          empathy: v.number(),
-          argumentQuality: v.number(),
-          persistence: v.number(),
-          adaptability: v.number(),
-        }),
-        highlights: v.array(v.string()),
-        improvements: v.array(v.string()),
-        summary: v.string(),
-      })
-    ),
-    debugEvents: v.optional(
-      v.array(
-        v.object({
-          timestamp: v.number(),
-          type: v.string(),
-          data: v.any(),
-        })
-      )
-    ),
-    endTrigger: v.optional(v.string()), // 'supervisor' | 'end_conversation' | 'disconnect'
-    durationMs: v.number(),
-    exchangeCount: v.number(),
+    createdAt: v.number(),
   })
-    .index('by_user', ['userName'])
-    .index('by_outcome', ['outcome']),
+    .index('by_player', ['playerName'])
+    .index('by_created', ['createdAt']),
 })

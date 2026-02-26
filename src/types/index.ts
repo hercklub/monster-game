@@ -1,115 +1,65 @@
 // ============================================
-// Core Types for AI Convince Demo
+// Don't Open The Door — Game Types
 // ============================================
 
-/** Persona definition — the AI character the user talks to */
-export interface Persona {
-  id: string
+export type PlayerRoleId = 'child' | 'sheriff' | 'widow'
+export type AICharacterId = 'grandmother' | 'runner'
+export type AIType = 'monster' | 'human'
+export type Decision = 'open' | 'lock' | 'timeout'
+export type Outcome = 'survived' | 'saved' | 'died' | 'guilt' | 'coward'
+
+export type GamePhase =
+  | 'idle'
+  | 'selecting'
+  | 'intro'
+  | 'countdown'
+  | 'active'
+  | 'deciding'
+  | 'revealing'
+  | 'ended'
+
+export interface PlayerRole {
+  id: PlayerRoleId
   name: string
   age: number
+  setting: string
   description: string
-  background: string
-  speechStyle: string
-  initialAttitude: number // 1-10 (1 = won't budge, 10 = ready to change)
-  voice: string // OpenAI realtime voice id
-  traits: string[] // character traits for the prompt
-  resistancePoints: string[] // things they push back on
-  weakPoints: string[] // what might actually convince them
+  context: string
 }
 
-/** Goal definition — what the user is trying to achieve */
-export interface Goal {
-  id: string
-  title: string
-  description: string
-  successCriteria: string[]
+export interface AICharacter {
+  id: AICharacterId
+  name: string
+  type: AIType
+  voice: string
+  openingLine: string
+  prompt: string
 }
 
-/** Scenario = persona + goal */
-export interface Scenario {
-  id: string
-  persona: Persona
-  goal: Goal
-}
-
-/** Transcript message */
 export interface TranscriptMessage {
   role: 'user' | 'assistant'
   content: string
   timestamp: number
 }
 
-/** Supervisor evaluation — runs during conversation */
-export interface SupervisorEvaluation {
-  attitude: number // 1-10 current attitude
-  attitudeDirection: 'rising' | 'falling' | 'stable'
-  guidance: string // natural language guidance for persona (Czech)
-  topicsCovered: string[]
-  isOnTrack: boolean // is persona staying in character?
-  shouldEnd: boolean // should conversation end?
-  endReason?: 'converted' | 'walked_away' | 'gave_up'
-}
-
-/** Post-conversation score */
-export interface PostConversationScore {
-  overall: number // 0-100
-  categories: {
-    empathy: number
-    argumentQuality: number
-    persistence: number
-    adaptability: number
-  }
-  highlights: string[]
-  improvements: string[]
-  outcome: 'converted' | 'rejected' | 'walked_away'
-  summary: string
-}
-
-/** Session state */
-export interface SessionState {
-  sessionId: string
-  scenario: Scenario
+export interface GameState {
+  phase: GamePhase
+  playerRole: PlayerRole | null
+  aiCharacterName: string | null
+  aiCharacterVoice: string | null
+  aiType: AIType | null
   transcript: TranscriptMessage[]
-  moodHistory: number[]
-  currentAttitude: number
-  status: 'idle' | 'connecting' | 'active' | 'ended'
-  score?: PostConversationScore
+  timerSeconds: number
+  decision: Decision | null
+  outcome: Outcome | null
+  points: number
+  sessionId: string | null
 }
 
-/** API: Create session response */
-export interface CreateSessionResponse {
+export interface SessionResponse {
   sessionId: string
   clientSecret: string
-  persona: {
-    id: string
-    name: string
-    voice: string
-    initialAttitude: number
-  }
-}
-
-/** API: Supervisor request */
-export interface SupervisorRequest {
-  transcript: TranscriptMessage[]
-  moodHistory: number[]
-  currentAttitude: number
-  personaId: string
-}
-
-/** API: Supervisor response */
-export interface SupervisorResponse {
-  evaluation: SupervisorEvaluation
-  stateInjection: string // pre-built block for conversation.item.create
-}
-
-/** OpenAI Realtime tool definition */
-export interface ToolDefinition {
-  type: 'function'
-  name: string
-  description: string
-  parameters: {
-    type: 'object'
-    properties: Record<string, unknown>
-    required: string[]
-  }
+  playerRole: string
+  aiCharacterName: string
+  aiCharacterVoice: string
 }
